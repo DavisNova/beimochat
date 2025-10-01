@@ -24,11 +24,23 @@ jobs:
     - name: Get Flutter dependencies
       run: flutter pub get
       
+    - name: Clean iOS build artifacts
+      run: |
+        cd ios
+        rm -rf Pods/
+        rm -f Podfile.lock
+        rm -f Flutter/Generated.xcconfig
+        cd ..
+        
     - name: Install iOS dependencies
       run: |
         cd ios
         pod install
         cd ..
+        
+    - name: Fix script permissions
+      run: |
+        find ios/Pods -type f -name "*.sh" -exec chmod +x {} \;
         
     - name: Build iOS app
       run: |
