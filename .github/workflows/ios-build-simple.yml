@@ -62,11 +62,17 @@ jobs:
       run: |
         flutter build ios --release --no-codesign
         
+    - name: List build outputs
+      run: |
+        echo "=== Debug Build Output ==="
+        find build/ios -name "*.app" -type d
+        echo "=== Release Build Output ==="
+        find build/ios -name "*.app" -type d
+        
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ios-build-files
         path: |
-          build/ios/iphoneos/
-          ios/build/
+          build/ios/
         retention-days: 30
