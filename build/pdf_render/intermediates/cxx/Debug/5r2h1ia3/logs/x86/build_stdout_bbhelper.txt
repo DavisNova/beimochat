@@ -1,0 +1,3 @@
+ninja: Entering directory `C:\Users\Administrator\AppData\Local\Pub\Cache\hosted\pub.dev\pdf_render-1.4.12\android\.cxx\Debug\5r2h1ia3\x86'
+[1/2] Building CXX object CMakeFiles/bbhelper.dir/c++/directBufferAndroid.cpp.o
+[2/2] Linking CXX shared library E:\AI\cursor\ChatApp\app\whoxa-flutter-app\beimo\build\pdf_render\intermediates\cxx\Debug\5r2h1ia3\obj\x86\libbbhelper.so

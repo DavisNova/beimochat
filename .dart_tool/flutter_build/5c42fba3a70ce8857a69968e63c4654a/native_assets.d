@@ -1,0 +1,1 @@
+ E:\\AI\\cursor\\ChatApp\\app\\whoxa-flutter-app\\beimo\\.dart_tool\\flutter_build\\5c42fba3a70ce8857a69968e63c4654a\\native_assets.yaml: 
