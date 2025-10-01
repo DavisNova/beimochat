@@ -29,13 +29,25 @@ jobs:
         cd ios
         rm -rf Pods/
         rm -f Podfile.lock
-        rm -f Flutter/Generated.xcconfig
         cd ..
+        
+    - name: Check iOS configuration
+      run: |
+        echo "Checking for Generated.xcconfig..."
+        ls -la ios/Flutter/
+        if [ -f "ios/Flutter/Generated.xcconfig" ]; then
+          echo "Generated.xcconfig exists"
+          cat ios/Flutter/Generated.xcconfig
+        else
+          echo "Generated.xcconfig not found, running flutter pub get again..."
+          flutter pub get
+          ls -la ios/Flutter/
+        fi
         
     - name: Install iOS dependencies
       run: |
         cd ios
-        pod install
+        pod install --repo-update
         cd ..
         
     - name: Fix script permissions
