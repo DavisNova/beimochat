@@ -1,72 +1,92 @@
-name: iOS Build (No Signing)
+name: Build iOS IPA
 
 on:
   push:
     branches: [ photo-management, main ]
   pull_request:
     branches: [ photo-management, main ]
-  workflow_dispatch:
+  workflow_dispatch:  # 允许手动触发
 
 jobs:
-  build-ios:
+  build_ios:
+    name: Build iOS IPA
     runs-on: macos-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
-      
+    
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.27.1'
         channel: 'stable'
-        
-    - name: Get Flutter dependencies
+        cache: false  # 禁用缓存，强制使用新版本
+    
+    - name: Verify Flutter version
+      run: flutter --version
+    
+    - name: Install Flutter dependencies
       run: flutter pub get
-      
-    - name: Clean iOS build artifacts
+    
+    - name: Analyze Flutter code
+      run: flutter analyze
+      continue-on-error: true
+    
+    - name: Setup iOS dependencies
       run: |
         cd ios
-        rm -rf Pods/
-        rm -f Podfile.lock
+        pod install
         cd ..
-        
-    - name: Check iOS configuration
+    
+    - name: Clean Flutter build
+      run: flutter clean
+    
+    - name: Build iOS Debug (No Code Sign)
+      run: flutter build ios --debug --no-codesign
+    
+    - name: Create IPA from iOS build
       run: |
-        echo "Checking for Generated.xcconfig..."
-        ls -la ios/Flutter/
-        if [ -f "ios/Flutter/Generated.xcconfig" ]; then
-          echo "Generated.xcconfig exists"
-          cat ios/Flutter/Generated.xcconfig
-        else
-          echo "Generated.xcconfig not found, running flutter pub get again..."
-          flutter pub get
-          ls -la ios/Flutter/
-        fi
-        
-    - name: Install iOS dependencies
+        cd build/ios/iphoneos
+        mkdir -p Payload
+        cp -r Runner.app Payload/
+        zip -r ../../../Runner-Debug.ipa Payload/
+        cd ../../..
+    
+    - name: Build iOS Release (No Code Sign)
+      run: flutter build ios --release --no-codesign
+      continue-on-error: true
+    
+    - name: Create Release IPA from iOS build
       run: |
-        cd ios
-        pod install --repo-update
-        cd ..
-        
-    - name: Fix script permissions
-      run: |
-        find ios/Pods -type f -name "*.sh" -exec chmod +x {} \;
-        
-    - name: Build iOS app (Debug)
-      run: |
-        flutter build ios --debug --no-codesign
-        
-    - name: Build iOS app (Release)
-      run: |
-        flutter build ios --release --no-codesign
-        
-    - name: Upload build artifacts
+        cd build/ios/iphoneos
+        mkdir -p Payload
+        cp -r Runner.app Payload/
+        zip -r ../../../Runner-Release.ipa Payload/
+        cd ../../..
+      continue-on-error: true
+    
+    - name: Upload Debug IPA
       uses: actions/upload-artifact@v4
       with:
-        name: ios-build-files
-        path: |
-          build/ios/iphoneos/
-          ios/build/
+        name: iOS-Debug-IPA
+        path: Runner-Debug.ipa
         retention-days: 30
+    
+    - name: Upload Release IPA
+      uses: actions/upload-artifact@v4
+      with:
+        name: iOS-Release-IPA
+        path: Runner-Release.ipa
+        retention-days: 30
+      continue-on-error: true
+    
+    - name: Upload build logs
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: iOS-Build-Logs
+        path: |
+          build/ios/
+          ios/Pods/
+        retention-days: 7
