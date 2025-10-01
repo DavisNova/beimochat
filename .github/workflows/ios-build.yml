@@ -39,6 +39,20 @@ jobs:
         pod install
         cd ..
     
+    - name: Fix script permissions
+      run: |
+        echo "修复所有.sh脚本权限..."
+        find ios/Pods -type f -name "*.sh" -exec chmod +x {} \;
+        echo "特别修复WebRTC-SDK脚本..."
+        if [ -f "ios/Pods/Target Support Files/WebRTC-SDK/WebRTC-SDK-xcframeworks.sh" ]; then
+          chmod +x "ios/Pods/Target Support Files/WebRTC-SDK/WebRTC-SDK-xcframeworks.sh"
+          ls -la "ios/Pods/Target Support Files/WebRTC-SDK/WebRTC-SDK-xcframeworks.sh"
+        fi
+        echo "修复所有Target Support Files中的脚本..."
+        find "ios/Pods/Target Support Files" -name "*.sh" -exec chmod +x {} \;
+        echo "验证权限修复结果..."
+        find ios/Pods -type f -name "*.sh" -exec ls -la {} \;
+    
     - name: Clean Flutter build
       run: flutter clean
     

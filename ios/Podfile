@@ -40,6 +40,9 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  # Fix script permissions for all .sh files in Pods
+  system("find Pods -type f -name '*.sh' -exec chmod +x {} \\;")
+  
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
